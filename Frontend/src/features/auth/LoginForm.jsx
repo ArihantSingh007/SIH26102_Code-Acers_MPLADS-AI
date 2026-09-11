@@ -9,8 +9,9 @@ export const LoginForm = ({ onSuccess, initialRole = ROLES.MOSPI_ADMIN }) => {
   const [view, setView] = useState('signin'); // 'signin' | 'forgot' | 'signup'
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [email, setEmail] = useState('admin.mospi@gov.in');
-  const [password, setPassword] = useState('••••••••••••');
+  const [password, setPassword] = useState('Admin@MPLADS2026');
   const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -35,12 +36,14 @@ export const LoginForm = ({ onSuccess, initialRole = ROLES.MOSPI_ADMIN }) => {
     setSelectedRole(roleKey);
     if (roleKey === ROLES.MOSPI_ADMIN) {
       setEmail('admin.mospi@gov.in');
+      setPassword('Admin@MPLADS2026');
     } else if (roleKey === ROLES.DISTRICT_OFFICER) {
       setEmail('collector.varanasi@gov.in');
+      setPassword('Varanasi@DM2026');
     } else {
       setEmail('citizen.patel@gmail.com');
+      setPassword('Citizen@Gov2026');
     }
-    setPassword('••••••••••••');
     setError('');
   };
 
@@ -216,8 +219,13 @@ export const LoginForm = ({ onSuccess, initialRole = ROLES.MOSPI_ADMIN }) => {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 text-[11px] font-bold tracking-wider text-slate-700 hover:text-slate-900 select-none cursor-pointer transition"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowPassword((prev) => !prev);
+                }}
+                className="absolute right-3.5 text-[11px] font-bold tracking-wider text-slate-700 hover:text-slate-900 select-none cursor-pointer transition z-10 px-1.5 py-0.5 rounded hover:bg-slate-100"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? 'HIDE' : 'SHOW'}
               </button>
@@ -242,7 +250,7 @@ export const LoginForm = ({ onSuccess, initialRole = ROLES.MOSPI_ADMIN }) => {
             <button
               type="button"
               onClick={() => {
-                setResetEmail(email !== '••••••••••••' ? email : '');
+                setResetEmail(email || '');
                 setView('forgot');
               }}
               className="text-slate-700 hover:text-slate-900 font-medium transition cursor-pointer"
@@ -395,15 +403,27 @@ export const LoginForm = ({ onSuccess, initialRole = ROLES.MOSPI_ADMIN }) => {
               />
             </div>
 
-            <div>
+            <div className="relative flex items-center">
               <input
-                type="password"
+                type={showSignupPassword ? 'text' : 'password'}
                 required
                 placeholder="Password (min 8 characters)"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
-                className="w-full px-3.5 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition"
+                className="w-full px-3.5 py-3 pr-16 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition"
               />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowSignupPassword((prev) => !prev);
+                }}
+                className="absolute right-3.5 text-[11px] font-bold tracking-wider text-slate-700 hover:text-slate-900 select-none cursor-pointer transition z-10 px-1.5 py-0.5 rounded hover:bg-slate-100"
+                aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+              >
+                {showSignupPassword ? 'HIDE' : 'SHOW'}
+              </button>
             </div>
 
             <div>

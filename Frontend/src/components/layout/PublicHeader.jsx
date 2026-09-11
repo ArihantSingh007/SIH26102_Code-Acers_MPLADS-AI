@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Camera, User, LogOut, ChevronDown, LayoutDashboard } from 'lucide-react';
+import { Home, User, LogOut, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
-import { Button } from '../common/Button';
 
 const dropdownVariants = {
   hidden: { opacity: 0, scaleY: 0.85, originY: 0, y: -4 },
@@ -66,9 +65,6 @@ export const PublicHeader = ({ activeSubtitle = 'Public Registry' }) => {
                 <span className="font-extrabold text-base tracking-tight text-gov-navy">
                   Scheme Guard <span className="text-gov-saffron font-bold">CITIZEN PORTAL</span>
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-gov-canvas text-gov-muted border border-gov-border px-1.5 py-0.5 rounded hidden sm:inline-block">
-                  MoSPI e-SAKSHI Layer
-                </span>
               </div>
               <p className="text-[10px] text-gov-muted font-medium hidden xs:block">
                 Ministry of Statistics & Programme Implementation • {activeSubtitle}
@@ -111,20 +107,8 @@ export const PublicHeader = ({ activeSubtitle = 'Public Registry' }) => {
             })}
           </nav>
 
-          {/* Right Section: Citizen Grievance & User Profile */}
+          {/* Right Section: Authenticated Citizen Profile Dropdown OR Sign In Link */}
           <div className="flex items-center gap-3">
-
-            <Button
-              variant="danger"
-              size="sm"
-              icon={Camera}
-              onClick={() => navigate('/public/report')}
-              className="font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-xs cursor-pointer"
-            >
-              Report Issue
-            </Button>
-
-            {/* Authenticated Citizen Profile Dropdown OR Sign In Link */}
             {user ? (
               <div className="relative">
                 <button

@@ -39,6 +39,7 @@ export const Sidebar = () => {
     { label: t('nav_all_works', 'All Works Directory'), path: '/projects', icon: FolderGit2 },
     { label: t('nav_evidence_lab', 'AI Forensic Evidence Lab'), path: '/evidence', icon: Camera, highlight: true },
     { label: t('nav_sla', 'SLA Delay Escalations'), path: '/sla', icon: Clock, badge: '12', badgeColor: 'bg-amber-50 text-amber-800 border border-amber-200' },
+    { label: t('nav_public_reports', 'Public Vigilance Reports'), path: '/admin/grievances', icon: MessageSquareWarning, badge: 'New', badgeColor: 'bg-emerald-50 text-emerald-800 border border-emerald-200', highlight: true },
   ];
 
   const districtNavItems = [

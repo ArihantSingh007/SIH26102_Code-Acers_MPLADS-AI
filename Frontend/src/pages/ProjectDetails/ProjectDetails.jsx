@@ -135,13 +135,13 @@ export const ProjectDetails = () => {
       {/* ========================================================================= */}
       <div className="relative bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 overflow-hidden shadow-2xs">
         {/* Transparent Decorative Road & Trees Vector in the Upper Right Corner */}
-        <div className="absolute right-0 top-0 bottom-0 w-80 sm:w-96 pointer-events-none opacity-25 overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-80 sm:w-96 pointer-events-none opacity-20 overflow-hidden">
           <svg viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full object-cover">
             <path d="M400 200 C300 180 240 120 180 80 C120 40 40 10 0 0 L400 0 Z" fill="#93C5FD" />
             <path d="M400 170 C310 150 250 95 190 60 C130 25 50 5 0 0" stroke="#3B82F6" strokeWidth="4" strokeDasharray="12 8" />
             <circle cx="280" cy="50" r="18" fill="#60A5FA" />
             <circle cx="330" cy="40" r="24" fill="#93C5FD" />
-            <circle cx="240" cy="65" r="14" fill="#2563EB" />
+            <circle cx="240" cy="65" r="14" fill="#3B82F6" />
             <circle cx="360" cy="70" r="16" fill="#60A5FA" />
           </svg>
         </div>
@@ -183,7 +183,7 @@ export const ProjectDetails = () => {
                   size="sm"
                   onClick={() => navigate('/admin/grievances')}
                   icon={FileText}
-                  className="text-xs font-semibold border-blue-300 bg-blue-50 text-blue-900 hover:bg-blue-100"
+                  className="text-xs font-semibold border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
                 >
                   Public Vigilance Reports
                 </Button>
@@ -231,7 +231,7 @@ export const ProjectDetails = () => {
           
           {/* Card 1: Risk Overview with Animated Circle Gauge */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
-            {/* Header with Amber Accent Bar */}
+            {/* Header with Orange Accent Bar */}
             <div className="flex items-start gap-3 border-l-4 border-amber-500 pl-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">Risk Overview</h3>
@@ -261,7 +261,7 @@ export const ProjectDetails = () => {
                       cx={circleSize / 2}
                       cy={circleSize / 2}
                       r={radius}
-                      stroke={riskScoreVal >= 70 ? '#EF4444' : riskScoreVal >= 40 ? '#F59E0B' : '#10B981'}
+                      stroke={riskScoreVal >= 70 ? '#F97316' : riskScoreVal >= 40 ? '#FBBF24' : '#10B981'}
                       strokeWidth={strokeWidth}
                       strokeDasharray={circumference}
                       initial={{ strokeDashoffset: circumference }}
@@ -381,7 +381,7 @@ export const ProjectDetails = () => {
 
           {/* Card: Project Details (Moved to Left Column opposite Verified Records) */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
-            {/* Header with Institutional Navy Accent Bar */}
+            {/* Header with Dark Blue Accent Bar */}
             <div className="flex items-start gap-3 border-l-4 border-[#0B2545] pl-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">Project Details</h3>
@@ -393,25 +393,25 @@ export const ProjectDetails = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 text-xs">
               <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
-                <span className="text-slate-500 font-medium block text-[11px]">Implementing Agency</span>
+                <span className="text-slate-400 font-medium block text-[11px]">Implementing Agency</span>
                 <span className="text-slate-900 font-bold block">{project.implementingAgency || 'MPLADS Implementing Agency'}</span>
                 <span className="text-slate-400 text-[10px] block">(Govt. of {project.state || 'UP'})</span>
               </div>
 
               <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
-                <span className="text-slate-500 font-medium block text-[11px]">Contractor</span>
+                <span className="text-slate-400 font-medium block text-[11px]">Contractor</span>
                 <span className="text-slate-900 font-bold block">{project.contractor || 'Apex Infra & BuildTech Pvt Ltd'}</span>
                 <span className="text-slate-400 text-[10px] block">(Vendor ID: VEN-2024-81)</span>
               </div>
 
               <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
-                <span className="text-slate-500 font-medium block text-[11px]">Sponsoring MP</span>
+                <span className="text-slate-400 font-medium block text-[11px]">Sponsoring MP</span>
                 <span className="text-slate-900 font-bold block">{project.mpName || 'Shri Narendra Modi'}</span>
                 <span className="text-slate-400 text-[10px] block">({project.district || 'Varanasi'})</span>
               </div>
 
               <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
-                <span className="text-slate-500 font-medium block text-[11px]">District Authority</span>
+                <span className="text-slate-400 font-medium block text-[11px]">District Authority</span>
                 <span className="text-slate-900 font-bold block">{project.district}, {project.state}</span>
                 <span className="text-slate-400 text-[10px] block">(District Collector)</span>
               </div>
@@ -470,28 +470,39 @@ export const ProjectDetails = () => {
                         {idx > 0 && (
                           <div
                             className={`absolute left-0 right-1/2 h-0.5 ${
-                              isDone || isCurrent ? 'bg-blue-600' : 'bg-slate-200'
+                              isDone || isCurrent ? 'bg-emerald-500' : 'bg-slate-200'
                             }`}
                           />
                         )}
                         {idx < timelineSteps.length - 1 && (
                           <div
                             className={`absolute left-1/2 right-0 h-0.5 ${
-                              isDone ? 'bg-blue-600' : 'bg-slate-200'
+                              isDone ? 'bg-emerald-500' : 'bg-slate-200'
                             }`}
                           />
                         )}
 
-                        {/* Node circle */}
-                        <div
-                          className={`relative z-10 w-4 h-4 rounded-full mx-auto border-2 flex items-center justify-center transition-all ${
-                            isDone
-                              ? 'bg-blue-600 border-blue-700 shadow-xs'
-                              : isCurrent
-                              ? 'bg-white border-blue-600 ring-4 ring-blue-100 scale-110'
-                              : 'bg-white border-slate-300'
-                          }`}
-                        />
+                        {/* Node Circle */}
+                        <div className="relative z-10 mx-auto">
+                          {isDone ? (
+                            <motion.div
+                              whileHover={{ scale: 1.2 }}
+                              className="w-4 h-4 rounded-full border-2 border-emerald-500 bg-white flex items-center justify-center shadow-xs"
+                            >
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            </motion.div>
+                          ) : isCurrent ? (
+                            <motion.div
+                              animate={{ scale: [1, 1.15, 1] }}
+                              transition={{ repeat: Infinity, duration: 2 }}
+                              className="w-5 h-5 rounded-full border-2 border-blue-600 bg-blue-600 flex items-center justify-center shadow-sm"
+                            >
+                              <div className="w-2 h-2 rounded-full bg-white" />
+                            </motion.div>
+                          ) : (
+                            <div className="w-4 h-4 rounded-full border-2 border-slate-300 bg-white" />
+                          )}
+                        </div>
                       </div>
                     </motion.div>
                   );
@@ -500,12 +511,12 @@ export const ProjectDetails = () => {
             </div>
           </div>
 
-          {/* Card 4: Why This Project Was Flagged */}
+          {/* Card 4: Why this project was flagged */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
-            {/* Header with Rose Accent Bar */}
-            <div className="flex items-start gap-3 border-l-4 border-rose-500 pl-3">
+            {/* Header with Orange Accent Bar */}
+            <div className="flex items-start gap-3 border-l-4 border-amber-500 pl-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">Why This Project Was Flagged</h3>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Why this project was flagged</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Key issues found by the AI engine.
                 </p>

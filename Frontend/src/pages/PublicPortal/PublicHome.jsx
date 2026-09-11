@@ -72,12 +72,7 @@ export const PublicHome = () => {
       {/* Hero Section */}
       <section className="bg-gov-surface py-12 px-4 sm:px-6 lg:px-8 border-b border-gov-border">
         <div className="max-w-4xl mx-auto text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-100 text-gov-navy text-xs font-semibold border border-gov-border">
-            <Sparkles className="w-3.5 h-3.5 text-gov-saffron" />
-            <span>Official Public Fund Transparency Registry</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl font-black text-gov-navy tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-gov-navy tracking-tight leading-tight">
             Know Where Public Funds Are Being Invested.
           </h1>
 

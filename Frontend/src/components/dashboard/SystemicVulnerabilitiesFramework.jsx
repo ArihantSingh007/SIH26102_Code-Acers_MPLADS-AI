@@ -10,8 +10,7 @@ import {
   ShieldCheck,
   Zap,
   Fingerprint,
-  Radio,
-  Scale
+  Radio
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -110,24 +109,10 @@ export const SystemicVulnerabilitiesFramework = () => {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-md overflow-hidden">
       {/* Top Header */}
-      <div className="p-6 bg-gradient-to-r from-[#0B2545] via-[#0F315E] to-[#133A6B] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-cyan-300 text-xs font-semibold mb-2 font-mono">
-            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Public Fund Integrity Safeguards</span>
-          </div>
-          <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            How the System Protects Public Money
-          </h3>
-          <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-            Clear, transparent rules to prevent fake photos, stop officer collusion, and ensure honest public spending.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-xl border border-white/10 shrink-0">
-          <Scale className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-bold text-white">CPWD & PFMS Compliant</span>
-        </div>
+      <div className="py-9 px-6 sm:px-10 bg-gradient-to-r from-[#0B2545] via-[#0F315E] to-[#133A6B] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h3 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+          How the System Protects Public Money
+        </h3>
       </div>
 
       {/* Tab Selector Buttons */}
@@ -163,21 +148,12 @@ export const SystemicVulnerabilitiesFramework = () => {
             transition={{ duration: 0.25 }}
             className="space-y-6"
           >
-            {/* Title & Badge */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center border border-blue-200 shrink-0">
-                  <current.icon className="w-5 h-5 text-blue-700" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-black text-slate-900">{current.name}</h4>
-                  <span className="text-xs text-slate-500">Methodology Pillar #{activeTab + 1}</span>
-                </div>
+            {/* Title */}
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center border border-blue-200 shrink-0">
+                <current.icon className="w-5 h-5 text-blue-700" />
               </div>
-
-              <span className={`px-3 py-1 rounded-full text-xs font-bold border font-mono self-start sm:self-auto ${current.badge}`}>
-                {current.tag}
-              </span>
+              <h4 className="text-lg sm:text-xl font-black text-slate-900">{current.name}</h4>
             </div>
 
             {/* Split: Vulnerability vs Solution */}
