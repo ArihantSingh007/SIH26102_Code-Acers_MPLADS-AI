@@ -117,7 +117,8 @@ export const DEMO_USERS = [
   },
   {
     id: 'USR-DIST-07',
-    email: 'dm.varanasi@up.gov.in',
+    email: 'collector.varanasi@gov.in',
+    alternateEmail: 'dm.varanasi@up.gov.in',
     name: 'Priyanka Verma, IAS',
     designation: 'District Magistrate & Project Officer',
     department: 'District Administration, Varanasi, Uttar Pradesh',

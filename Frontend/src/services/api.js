@@ -1,4 +1,5 @@
 import { FALLBACK_PROJECTS, generateFallbackProject } from '../data/fallbackProjects';
+import { CITIZEN_REPORTS_LIST } from './mockData';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://mplads-ai-backend-brqi.onrender.com/api/v1').replace(/\/$/, '');
 
@@ -250,17 +251,55 @@ export const api = {
 
   getCitizenReports: async () => {
     try {
-      return await request('/operations/reports');
-    } catch {
-      return { success: true, data: [] };
+      const res = await request('/operations/reports');
+      if (res && res.data && res.data.length > 0) return res;
+    } catch (e) {
+      // Fall through to local/mock store
     }
+    const local = JSON.parse(localStorage.getItem('scheme_guard_citizen_reports') || '[]');
+    const list = [...local, ...CITIZEN_REPORTS_LIST];
+    return { success: true, data: list };
+  },
+
+  submitGrievance: async (d) => {
+    return api.submitCitizenReport(d);
   },
 
   submitCitizenReport: async (d) => {
+    const reportId = `CIT-2026-${Math.floor(Math.random() * 90000 + 10000)}`;
+    const newReport = {
+      id: reportId,
+      projectId: d.project_id || d.projectId || 'MPLAD-2026-00124',
+      projectName: d.projectName || 'MPLADS Constituency Project',
+      issueType: d.issue_type || d.issueType || 'Substandard quality / Delay',
+      description: d.description || '',
+      location: d.location || 'Reported Location',
+      gps: d.gps || '25.3190° N, 82.9810° E',
+      submissionDate: new Date().toISOString().split('T')[0],
+      status: 'Under Verification',
+      citizenName: d.citizen_name || d.citizenName || 'Verified Citizen',
+      citizenPhone: d.citizen_phone || d.citizenPhone || '',
+      evidenceImage: d.evidenceImage || 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?w=600&auto=format&fit=crop&q=80',
+      aiPreCheck: 'Geotag analyzed. Discrepancy queued for central administrative review.'
+    };
+
     try {
-      return await request('/operations/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+      const local = JSON.parse(localStorage.getItem('scheme_guard_citizen_reports') || '[]');
+      local.unshift(newReport);
+      localStorage.setItem('scheme_guard_citizen_reports', JSON.stringify(local));
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
+      const res = await request('/operations/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(d)
+      });
+      return { success: true, data: { ...newReport, ...(res?.data || {}) }, id: reportId };
     } catch {
-      return { success: true, id: `CIT-2026-${Math.floor(Math.random() * 90000 + 10000)}` };
+      return { success: true, data: newReport, id: reportId };
     }
   },
 

@@ -39,7 +39,7 @@ export const DICTIONARY = {
     landing_nav_workflow: 'Audit Workflow',
     landing_nav_stats: 'National Stats',
     landing_nav_transparency: 'Public Transparency',
-    landing_login: 'Officer Login',
+    landing_login: 'Login',
 
     // Sidebar
     suite_admin: 'National Command Suite',
@@ -53,6 +53,7 @@ export const DICTIONARY = {
     nav_all_works: 'All Works Directory',
     nav_evidence_lab: 'AI Forensic Evidence Lab',
     nav_sla: 'SLA Delay Escalations',
+    nav_public_reports: 'Public Vigilance Reports',
     nav_district_overview: 'District Overview',
     nav_pending_sanctions: 'Pending Sanctions',
     nav_sla_alerts: 'SLA Risk Alerts',
@@ -79,8 +80,7 @@ export const DICTIONARY = {
     kpi_sla_risk_sub: '12 critical (<48h)',
 
     // 3 Column Architecture
-    arch_title: 'MPLAD Sentinel Architecture & Core Intelligence Engine',
-    arch_subtitle: 'Three-Pillar Continuous Audit Architecture: AI Analytics, Mathematical Risk Scoring, and Geospatial Interfaces',
+    arch_title: 'Scheme Guard Architecture & Core Intelligence Engine',
     arch_col1_title: 'AI Analytics Engines (The Brains)',
     arch_col1_sub: 'Automated perceptual hashing & graph ML replacing subjective auditing',
     arch_col1_f1_title: 'Duplicate Image Detection (OpenCV dHash)',

@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { PageLayout } from '../../components/layout/PageLayout';
-import { Card } from '../../components/ui/Card';
-import { RiskGauge } from '../../components/ui/RiskGauge';
-import { RiskBadge, StatusBadge, Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
 import { FALLBACK_PROJECTS } from '../../data/fallbackProjects';
@@ -12,26 +9,22 @@ import { formatINR, formatDate } from '../../utils/helpers';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { ROLES } from '../../utils/constants';
+import { motion } from 'framer-motion';
 import {
   ShieldAlert,
   IndianRupee,
-  Calendar,
   MapPin,
   Building,
-  User,
   CheckCircle2,
   AlertTriangle,
   Clock,
   Camera,
   Network,
-  ArrowRight,
-  FileText,
-  Sparkles,
+  Send,
+  ExternalLink,
   ChevronRight,
   ShieldCheck,
-  Send,
-  XCircle,
-  ExternalLink
+  FileText
 } from 'lucide-react';
 
 export const ProjectDetails = () => {
@@ -93,395 +86,527 @@ export const ProjectDetails = () => {
 
   if (isLoading && !project) {
     return (
-      <PageLayout title="Project Details" breadcrumbs={['Dashboard', 'Projects', 'Loading...']}>
-        <div className="p-12 text-center text-slate-500 font-medium">Loading comprehensive project dossier...</div>
-      </PageLayout>
+      <div className="p-12 text-center text-slate-500 font-medium">
+        Loading comprehensive project dossier...
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <PageLayout title="Project Not Found" breadcrumbs={['Dashboard', 'Projects', 'Not Found']}>
-        <div className="p-12 text-center text-slate-500 space-y-4">
-          <p>Project dossier could not be located.</p>
-          <Button variant="primary" onClick={() => navigate('/dashboard')}>Return to Dashboard</Button>
-        </div>
-      </PageLayout>
+      <div className="p-12 text-center text-slate-500 space-y-4">
+        <p>Project dossier could not be located.</p>
+        <Button variant="primary" onClick={() => navigate('/dashboard')}>Return to Dashboard</Button>
+      </div>
     );
   }
 
+  // Calculations for display
+  const sanctionedLakh = Math.round((project.sanctionedAmount || 0) / 100000);
+  const releasedLakh = Math.round((project.releasedAmount || 0) / 100000);
+  const utilizedLakh = Math.round((project.utilizedAmount || 0) / 100000);
+  const unspentLakh = Math.max(0, releasedLakh - utilizedLakh);
+  const fundsUtilPct = sanctionedLakh > 0 ? Math.round((utilizedLakh / sanctionedLakh) * 100) : 0;
+  const physicalProgressPct = project.progressPercent || 45;
+  const riskScoreVal = project.riskScore || 70;
+
+  // Timeline steps
+  const timelineSteps = project.timeline && project.timeline.length > 0 ? project.timeline : [
+    { stage: 'Approved', date: 'Aug 2024', status: 'completed' },
+    { stage: 'Funds Released', date: 'Oct 2024', status: 'completed' },
+    { stage: 'Work Started', date: 'Nov 2024', status: 'completed' },
+    { stage: 'Work Progress', date: 'Jan 2025', status: 'in-progress' },
+    { stage: 'Field Inspection', date: 'Pending', status: 'pending' },
+    { stage: 'Completion', date: 'Pending', status: 'pending' },
+  ];
+
+  // Circle Gauge Dimensions & Animation
+  const circleSize = 140;
+  const strokeWidth = 12;
+  const radius = (circleSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  // Use 270 degree sweep for gauge or standard circumference
+  const strokeOffset = circumference - (riskScoreVal / 100) * circumference;
+
   return (
-    <PageLayout
-      title={project.name}
-      subtitle={`Project ID: ${project.id} • ${project.location}, ${project.district}, ${project.state}`}
-      breadcrumbs={['Dashboard', 'High-Risk Queue', project.id]}
-      badge={<StatusBadge status={project.status} />}
-      actions={
-        isCitizen ? null : (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/cartel-matrix')}
-              icon={Network}
-            >
-              Cartel Graph
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => navigate('/evidence')}
-              icon={Camera}
-            >
-              Verify AI Evidence
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsDecisionModalOpen(true)}
-              icon={ShieldCheck}
-            >
-              Take Official Action
-            </Button>
-          </div>
-        )
-      }
-    >
-      {/* TOP HALF EXECUTIVE SPLIT: Circular AI Risk Assessment (Left) Alongside Funds Utilization (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-        {/* Left: Prominent Circular AI Risk Assessment */}
-        <Card
-          title="AI Risk Assessment"
-          subtitle="Normalized neural threat index & multi-signal anomaly evaluation"
-          icon={ShieldAlert}
-          riskAccent="high"
-          className="lg:col-span-5 flex flex-col justify-between p-5"
-        >
-          <div className="flex flex-col items-center justify-center pt-2">
-            <RiskGauge score={project.riskScore} size={200} />
-          </div>
-
-          <div className="mt-4 pt-3.5 border-t border-gov-border space-y-2 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-gov-muted">Model Confidence:</span>
-              <span className="font-mono font-bold text-gov-navy">94.2% (Ensemble Vision + Tabular)</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gov-muted">Anomaly Signals Caught:</span>
-              <span className="font-mono font-bold text-rose-700">{project.anomalies?.length || 4} Critical Flags</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gov-muted">Recommended Statutory Action:</span>
-              <span className="font-bold text-amber-800">Hold Milestone Payout & Audit Field</span>
-            </div>
-          </div>
-
-          <div className={`mt-3.5 p-2.5 rounded text-center text-xs font-semibold ${
-            project.riskScore > 70
-              ? 'bg-rose-50 border border-rose-200 text-rose-800'
-              : project.riskScore > 40
-              ? 'bg-amber-50 border border-amber-200 text-amber-800'
-              : 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-          }`}>
-            {project.riskScore > 70
-              ? 'High-Priority Review Required • Escalated to District Collector'
-              : project.riskScore > 40
-              ? 'Moderate Variance • Periodic Field Inspection Due'
-              : 'Low Risk • Project Progress Milestone Normal'}
-          </div>
-        </Card>
-
-        {/* Right: Complete Funds Utilization & Financial Overview */}
-        <Card
-          title="Fund Utilization & Financial Intelligence"
-          subtitle="TSA / Hybrid Just-in-Time disbursement reconciled with Central PFMS & RBI SNA Escrow"
-          icon={IndianRupee}
-          className="lg:col-span-7 flex flex-col space-y-4 p-5"
-        >
-          {/* 4 Financial Metric Boxes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3 bg-gov-canvas border border-gov-border rounded-md space-y-1 border-t-2 border-t-gov-navy">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gov-muted">Sanctioned Allocation</p>
-              <h3 className="text-xl font-black font-mono text-gov-navy">{formatINR(project.sanctionedAmount)}</h3>
-              <p className="text-[11px] text-gov-muted">Sanction Date: {formatDate(project.sanctionDate)}</p>
-            </div>
-
-            <div className="p-3 bg-gov-canvas border border-gov-border rounded-md space-y-1 border-t-2 border-t-blue-600">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Released Funds (Installment 1)</p>
-              <h3 className="text-xl font-black font-mono text-blue-700">{formatINR(project.releasedAmount)}</h3>
-              <p className="text-[11px] text-gov-muted">Disbursed via PFMS to SNA Escrow</p>
-            </div>
-
-            <div className="p-3 bg-gov-canvas border border-gov-border rounded-md space-y-1 border-t-2 border-t-emerald-600">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Physical MB Utilized</p>
-              <h3 className="text-xl font-black font-mono text-emerald-800">{formatINR(project.utilizedAmount)}</h3>
-              <p className="text-[11px] text-gov-muted">Certified against Measurement Book</p>
-            </div>
-
-            <div className="p-3 bg-gov-canvas border border-gov-border rounded-md space-y-1 border-t-2 border-t-amber-500">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">Remaining Unspent Balance</p>
-              <h3 className="text-xl font-black font-mono text-amber-800">{formatINR(project.remainingAmount)}</h3>
-              <p className="text-[11px] text-gov-muted">Stage-2 Disbursal Condition Precedent</p>
-            </div>
-          </div>
-
-          {/* Reconciled Escrow & TSA Ledger Audit Snapshot */}
-          <div className="grid grid-cols-3 gap-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-md text-xs">
-            <div>
-              <span className="text-[10px] text-gov-muted uppercase font-bold tracking-wider block">SNA Escrow Acc</span>
-              <span className="font-mono text-xs font-semibold text-slate-800">SBIN0004218-99</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gov-muted uppercase font-bold tracking-wider block">Tranche Phase</span>
-              <span className="font-mono text-xs font-semibold text-blue-700">Tranche 1 (75%)</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gov-muted uppercase font-bold tracking-wider block">PFMS E-Bill Ref</span>
-              <span className="font-mono text-xs font-semibold text-emerald-700">PFMS/2026/EB-8812</span>
-            </div>
-          </div>
-
-          {/* Financial vs Physical Progress Reconciliation Bar */}
-          <div className="mt-4 pt-3.5 border-t border-gov-border space-y-2.5">
-            <div className="flex justify-between items-center text-xs">
-              <span className="font-semibold text-gov-navy">Financial Disbursal vs Physical Progress</span>
-              <span className="font-mono text-xs text-gov-muted">
-                Fund Disbursed: <strong className="text-blue-700">{Math.round((project.utilizedAmount / (project.sanctionedAmount || 1)) * 100)}%</strong> vs Physical: <strong className="text-emerald-700">{project.progressPercent}%</strong>
-              </span>
-            </div>
-
-            {/* Dual Comparative Bars */}
-            <div className="space-y-1.5">
-              <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, Math.round((project.utilizedAmount / (project.sanctionedAmount || 1)) * 100))}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-gov-muted">
-                <span>TSA Hybrid Protocol Compliance: VERIFIED</span>
-                <span className="font-mono">Central PFMS Reconciliation OK</span>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Progress & Milestones Bar */}
-      <Card
-        title="Physical Work Milestone Progression"
-        subtitle={`Current Stage: ${project.currentStage} (${project.progressPercent}% Physical Work Recorded)`}
-        icon={Clock}
-      >
-        <div className="space-y-3.5">
-          {/* Progress bar */}
-          <div className="w-full bg-gov-canvas rounded-full h-2.5 p-0.5 border border-gov-border overflow-hidden">
-            <div
-              className="bg-gov-navy h-full rounded-full transition-all duration-500"
-              style={{ width: `${project.progressPercent}%` }}
-            />
-          </div>
-
-          {/* Timeline steps */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center pt-1">
-            {(project.timeline || [
-              { stage: 'Approved', date: 'Aug 2025', status: 'completed' },
-              { stage: 'Funds Released', date: 'Oct 2025', status: 'completed' },
-              { stage: 'Work Started', date: 'Nov 2025', status: 'completed' },
-              { stage: 'Work Progress', date: 'Jan 2026', status: 'in-progress' },
-              { stage: 'Field Inspection', date: 'Pending', status: 'pending' },
-              { stage: 'Completion', date: 'Pending', status: 'pending' },
-            ]).map((step, idx) => (
-              <div
-                key={idx}
-                className={`p-2 rounded border text-xs ${
-                  step.status === 'completed'
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                    : step.status === 'in-progress'
-                    ? 'bg-blue-50 border-blue-400 text-blue-900 font-bold'
-                    : 'bg-gov-canvas border-gov-border text-gov-muted'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-1 mb-0.5">
-                  {step.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
-                  {step.status === 'in-progress' && <span className="w-2 h-2 rounded-full bg-gov-blue shrink-0 animate-pulse" />}
-                  <span className="font-semibold truncate">{step.stage}</span>
-                </div>
-                <span className="text-[10px] font-mono opacity-80">{step.date}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      {/* Main Grid: Explainable Findings (8 Cols) & Project Metadata / Signatures (4 Cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Project Administrative Metadata & Verification Audit Signatures (4 cols) */}
-        <div className="lg:col-span-4 space-y-4">
-          {/* Project Administrative Metadata */}
-          <Card title="Project Administration" icon={Building} className="text-xs space-y-3">
-            <div>
-              <span className="text-slate-500 block">Implementing Agency:</span>
-              <span className="font-semibold text-slate-800">{project.implementingAgency}</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Assigned Contractor:</span>
-              <span className="font-semibold text-slate-800">{project.contractor}</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Sponsoring Hon'ble MP:</span>
-              <span className="font-semibold text-slate-800">{project.mpName} ({project.constituency})</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Nodal District Authority:</span>
-              <span className="font-semibold text-slate-800">{project.district}, {project.state}</span>
-            </div>
-          </Card>
-
-          {/* Verification Audit Signatures */}
-          <Card title="Vigilance Trail & Audit Signatures" icon={FileText} className="text-xs space-y-3">
-            <div className="flex items-start gap-2 text-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold">Sanction Order Authenticated</p>
-                <p className="text-[10px] text-slate-400">Signed with NIC DSC token #48102-DL</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 text-slate-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold">Milestone 1 Geo-Coordinates Matched</p>
-                <p className="text-[10px] text-slate-400">Within 15m radius of sanction boundary</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 text-slate-700">
-              <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold text-amber-800">Pending Stage-2 MB Measurement</p>
-                <p className="text-[10px] text-slate-400">Junior Engineer inspection report awaited</p>
-              </div>
-            </div>
-          </Card>
+    <div className="space-y-6 pb-12">
+      {/* ========================================================================= */}
+      {/* HEADER SECTION with Breadcrumb, Title, Tag & Transparent Background Image */}
+      {/* ========================================================================= */}
+      <div className="relative bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 overflow-hidden shadow-2xs">
+        {/* Transparent Decorative Road & Trees Vector in the Upper Right Corner */}
+        <div className="absolute right-0 top-0 bottom-0 w-80 sm:w-96 pointer-events-none opacity-25 overflow-hidden">
+          <svg viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full object-cover">
+            <path d="M400 200 C300 180 240 120 180 80 C120 40 40 10 0 0 L400 0 Z" fill="#93C5FD" />
+            <path d="M400 170 C310 150 250 95 190 60 C130 25 50 5 0 0" stroke="#3B82F6" strokeWidth="4" strokeDasharray="12 8" />
+            <circle cx="280" cy="50" r="18" fill="#60A5FA" />
+            <circle cx="330" cy="40" r="24" fill="#93C5FD" />
+            <circle cx="240" cy="65" r="14" fill="#2563EB" />
+            <circle cx="360" cy="70" r="16" fill="#60A5FA" />
+          </svg>
         </div>
 
-        {/* Right Column: AI Explanations & Anomaly Cards (8 cols) */}
-        <div className="lg:col-span-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-sm text-slate-900">Explainable Algorithmic Findings</h3>
-              <p className="text-xs text-slate-500">Detailed algorithmic justification for high-risk flags</p>
-            </div>
-            <span className="text-xs font-mono font-semibold px-2 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200">
-              {project.anomalies?.length || 4} Signals Extracted
+        <div className="relative z-10 space-y-2.5">
+          {/* Clean Small Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+            <Link to="/dashboard" className="hover:text-blue-600 transition-colors">Dashboard</Link>
+            <span>&gt;</span>
+            <span className="text-slate-600 font-semibold">Project Details</span>
+          </div>
+
+          {/* Project Title + Pill Tag */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              {project.name}
+            </h1>
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+              AI Flagged
             </span>
           </div>
 
-          <div className="space-y-3">
-            {(project.anomalies && project.anomalies.length > 0 ? project.anomalies : [
-              {
-                id: `${project.id}-AI-1`,
-                title: 'Financial Drift: 87.5% funds disbursed with only 35.0% physical work completed.',
-                description: 'Financial Drift: 87.5% funds disbursed with only 35.0% physical work completed.',
-                evidence: 'Generated by the MPLADS-AI risk engine.',
-                severity: 'medium',
-                confidence: 52
-              },
-              {
-                id: `${project.id}-AI-2`,
-                title: 'Timeline Hazard: 415 days elapsed of 263 sanctioned schedule.',
-                description: 'Timeline Hazard: 415 days elapsed of 263 sanctioned schedule.',
-                evidence: 'Generated by the MPLADS-AI risk engine.',
-                severity: 'medium',
-                confidence: 52
-              },
-              {
-                id: `${project.id}-AI-3`,
-                title: 'ML Model Alert: IsolationForest flagged this fund/progress/time combination as a statistical outlier (67/100).',
-                description: 'ML Model Alert: IsolationForest flagged this fund/progress/time combination as a statistical outlier (67/100).',
-                evidence: 'Generated by the MPLADS-AI risk engine.',
-                severity: 'medium',
-                confidence: 52
-              },
-              {
-                id: `${project.id}-AI-4`,
-                title: 'Predictive Overrun Risk: 99% probability this project exceeds its sanctioned budget by >15% without intervention.',
-                description: 'Predictive Overrun Risk: 99% probability this project exceeds its sanctioned budget by >15% without intervention.',
-                evidence: 'Generated by the MPLADS-AI risk engine.',
-                severity: 'medium',
-                confidence: 52
-              }
-            ]).map((ano, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 bg-gov-surface border border-gov-border rounded-md shadow-sm space-y-2 hover:border-gov-blue transition-all"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                      ano.severity === 'high' || ano.severity === 'critical'
-                        ? 'bg-rose-50 text-rose-800 border border-rose-300'
-                        : ano.severity === 'medium'
-                        ? 'bg-amber-50 text-amber-900 border border-amber-300'
-                        : 'bg-blue-50 text-blue-800 border border-blue-200'
-                    }`}>
-                      {ano.severity || 'Alert'}
-                    </span>
-                    <h4 className="font-bold text-xs sm:text-sm text-gov-slateDark">{ano.title}</h4>
-                  </div>
+          {/* Project Metadata Subtitle */}
+          <p className="text-xs sm:text-sm text-slate-500 font-medium flex flex-wrap items-center gap-2">
+            <span>Project ID: <strong className="font-mono text-slate-700">{project.id}</strong></span>
+            <span>•</span>
+            <span>{project.location || `${project.district}, ${project.state}`}</span>
+            <span>•</span>
+            <span>{project.district}, {project.state}</span>
+          </p>
+        </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-mono font-bold text-gov-navy">{ano.confidence || 92}%</span>
-                    <span className="text-[10px] text-gov-muted block">Confidence</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-[10px] font-mono text-gov-muted">
-                  <span>Anomaly Code: {ano.id}</span>
-                </div>
-
-                <p className="text-xs text-gov-slate leading-relaxed">{ano.description}</p>
-
-                <div className="p-2.5 bg-gov-canvas rounded border border-gov-border text-[11px] text-gov-slate">
-                  <strong className="text-gov-slateDark">Auditable Evidence: </strong>
-                  <span>{ano.evidence}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Action Banner */}
-          {isCitizen ? (
-            <div className="p-3.5 bg-gov-surface border border-gov-border rounded-md flex items-center justify-between shadow-sm">
-              <div className="text-xs text-gov-slate">
-                Explore developmental works, contractor bidding histories, and fund allocations across your constituency.
-              </div>
+          {/* Action Buttons for Authorized Officers */}
+          {!isCitizen && (
+            <div className="relative z-10 flex flex-wrap items-center gap-2.5 pt-4 mt-2 border-t border-slate-100">
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/admin/grievances')}
+                  icon={FileText}
+                  className="text-xs font-semibold border-blue-300 bg-blue-50 text-blue-900 hover:bg-blue-100"
+                >
+                  Public Vigilance Reports
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate('/public/search')}
-                icon={ExternalLink}
-                className="shrink-0 ml-3 border-gov-border text-gov-slateDark hover:bg-gov-subtle"
+                onClick={() => navigate('/cartel-matrix')}
+                icon={Network}
+                className="text-xs font-semibold border-slate-200 text-slate-700 hover:bg-slate-50"
               >
-                Explore Constituency Works
+                Cartel Graph
               </Button>
-            </div>
-          ) : (
-            <div className="p-3.5 bg-gov-surface border border-gov-border rounded-md flex items-center justify-between shadow-sm border-l-4 border-l-gov-blue">
-              <div className="text-xs text-gov-slate">
-                Review statutory SLA delay escalation protocols and contractual liability notices.
-              </div>
               <Button
-                variant="outline"
+                variant="danger"
                 size="sm"
-                onClick={() => navigate('/sla')}
-                icon={Clock}
-                className="shrink-0 ml-3 border-gov-border text-gov-slateDark hover:bg-gov-subtle font-semibold"
+                onClick={() => navigate('/evidence')}
+                icon={Camera}
+                className="text-xs font-semibold"
               >
-                Inspect SLA Timelines
+                Verify AI Evidence
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsDecisionModalOpen(true)}
+                icon={ShieldCheck}
+                className="text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Take Official Action
               </Button>
             </div>
           )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2-COLUMN MAIN GRID: Left (Risk + Funds) & Right (Progress + Why Flagged) */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* ======================================================================= */}
+        {/* LEFT COLUMN (5 of 12)                                                  */}
+        {/* ======================================================================= */}
+        <div className="lg:col-span-5 space-y-6">
+          
+          {/* Card 1: Risk Overview with Animated Circle Gauge */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
+            {/* Header with Amber Accent Bar */}
+            <div className="flex items-start gap-3 border-l-4 border-amber-500 pl-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Risk Overview</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  AI analysis of documents, spending patterns and project progress.
+                </p>
+              </div>
+            </div>
+
+            {/* Split: Animated Circle Gauge (Left) + 3 Metrics (Right) */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center pt-2">
+              {/* Circle Gauge */}
+              <div className="sm:col-span-5 flex items-center justify-center">
+                <div className="relative flex items-center justify-center" style={{ width: circleSize, height: circleSize }}>
+                  <svg className="transform -rotate-90" width={circleSize} height={circleSize}>
+                    {/* Background Track */}
+                    <circle
+                      cx={circleSize / 2}
+                      cy={circleSize / 2}
+                      r={radius}
+                      stroke="#F1F5F9"
+                      strokeWidth={strokeWidth}
+                      fill="transparent"
+                    />
+                    {/* Animated Stroke Circle */}
+                    <motion.circle
+                      cx={circleSize / 2}
+                      cy={circleSize / 2}
+                      r={radius}
+                      stroke={riskScoreVal >= 70 ? '#EF4444' : riskScoreVal >= 40 ? '#F59E0B' : '#10B981'}
+                      strokeWidth={strokeWidth}
+                      strokeDasharray={circumference}
+                      initial={{ strokeDashoffset: circumference }}
+                      animate={{ strokeDashoffset: strokeOffset }}
+                      transition={{ duration: 1.2, ease: 'easeOut' }}
+                      strokeLinecap="round"
+                      fill="transparent"
+                    />
+                  </svg>
+                  {/* Gauge Center Content */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl font-black font-mono text-slate-900 tracking-tight">
+                      {riskScoreVal}
+                      <span className="text-xs font-normal text-slate-400 font-sans">/100</span>
+                    </span>
+                    <span className="text-[11px] font-bold text-amber-600 mt-0.5">
+                      {riskScoreVal >= 70 ? 'High Risk' : riskScoreVal >= 40 ? 'Warning' : 'Safe'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3 Right Key Metrics */}
+              <div className="sm:col-span-7 space-y-3.5 sm:border-l sm:border-slate-100 sm:pl-5">
+                <div>
+                  <span className="text-[11px] text-slate-400 font-medium block">Model confidence</span>
+                  <span className="text-lg font-black font-mono text-slate-900">
+                    {project.mlAnomalyScore ? `${project.mlAnomalyScore}%` : '94.2%'}
+                  </span>
+                </div>
+
+                <div className="border-t border-slate-100 pt-2.5">
+                  <span className="text-[11px] text-slate-400 font-medium block">Critical signals found</span>
+                  <span className="text-lg font-black font-mono text-slate-900">
+                    {project.anomalies?.length || 5}
+                  </span>
+                </div>
+
+                <div className="border-t border-slate-100 pt-2.5">
+                  <span className="text-[11px] text-slate-400 font-medium block">Recommended action</span>
+                  <span className="text-xs font-bold text-amber-600 block mt-0.5">
+                    Hold milestone payout
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Fund Utilization */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
+            {/* Header with Emerald Accent Bar */}
+            <div className="flex items-start gap-3 border-l-4 border-emerald-500 pl-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Fund Utilization</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Amount-wise breakdown of the project funds.
+                </p>
+              </div>
+            </div>
+
+            {/* 4 Clean Value Metric Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl space-y-1 text-left">
+                <span className="text-[10px] text-slate-400 font-semibold block">Sanctioned</span>
+                <span className="text-base font-black font-mono text-slate-900">₹{sanctionedLakh} Lakh</span>
+              </div>
+
+              <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl space-y-1 text-left">
+                <span className="text-[10px] text-slate-400 font-semibold block">Released</span>
+                <span className="text-base font-black font-mono text-blue-700">₹{releasedLakh} Lakh</span>
+              </div>
+
+              <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl space-y-1 text-left">
+                <span className="text-[10px] text-slate-400 font-semibold block">Utilized</span>
+                <span className="text-base font-black font-mono text-emerald-700">₹{utilizedLakh} Lakh</span>
+              </div>
+
+              <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-xl space-y-1 text-left">
+                <span className="text-[10px] text-slate-400 font-semibold block">Unspent</span>
+                <span className="text-base font-black font-mono text-amber-600">₹{unspentLakh} Lakh</span>
+              </div>
+            </div>
+
+            {/* Progress Bars for Funds Utilization & Physical Progress */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-slate-600">Funds Utilization</span>
+                  <span className="font-mono text-slate-900">{fundsUtilPct}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    className="bg-emerald-500 h-full rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, fundsUtilPct)}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-slate-600">Physical Progress</span>
+                  <span className="font-mono text-slate-900">{physicalProgressPct}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    className="bg-blue-600 h-full rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, physicalProgressPct)}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card: Project Details (Moved to Left Column opposite Verified Records) */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
+            {/* Header with Institutional Navy Accent Bar */}
+            <div className="flex items-start gap-3 border-l-4 border-[#0B2545] pl-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Project Details</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Administrative jurisdiction and execution parties.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 text-xs">
+              <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
+                <span className="text-slate-500 font-medium block text-[11px]">Implementing Agency</span>
+                <span className="text-slate-900 font-bold block">{project.implementingAgency || 'MPLADS Implementing Agency'}</span>
+                <span className="text-slate-400 text-[10px] block">(Govt. of {project.state || 'UP'})</span>
+              </div>
+
+              <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
+                <span className="text-slate-500 font-medium block text-[11px]">Contractor</span>
+                <span className="text-slate-900 font-bold block">{project.contractor || 'Apex Infra & BuildTech Pvt Ltd'}</span>
+                <span className="text-slate-400 text-[10px] block">(Vendor ID: VEN-2024-81)</span>
+              </div>
+
+              <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
+                <span className="text-slate-500 font-medium block text-[11px]">Sponsoring MP</span>
+                <span className="text-slate-900 font-bold block">{project.mpName || 'Shri Narendra Modi'}</span>
+                <span className="text-slate-400 text-[10px] block">({project.district || 'Varanasi'})</span>
+              </div>
+
+              <div className="space-y-1 p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl">
+                <span className="text-slate-500 font-medium block text-[11px]">District Authority</span>
+                <span className="text-slate-900 font-bold block">{project.district}, {project.state}</span>
+                <span className="text-slate-400 text-[10px] block">(District Collector)</span>
+              </div>
+            </div>
+          </div>
+
         </div>
+
+        {/* ======================================================================= */}
+        {/* RIGHT COLUMN (7 of 12)                                                 */}
+        {/* ======================================================================= */}
+        <div className="lg:col-span-7 space-y-6">
+          
+          {/* Card 3: Project Progress with Step Horizontal Timeline Transition */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
+            {/* Header with Blue Accent Bar */}
+            <div className="flex items-start gap-3 border-l-4 border-blue-600 pl-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Project Progress</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Current stage of work and timeline.
+                </p>
+              </div>
+            </div>
+
+            {/* Animated Interactive Step Timeline */}
+            <div className="pt-2 pb-2">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 relative">
+                {timelineSteps.map((step, idx) => {
+                  const isDone = step.status === 'completed';
+                  const isCurrent = step.status === 'in-progress';
+                  const isPending = !isDone && !isCurrent;
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, delay: idx * 0.08 }}
+                      className="flex flex-col items-center text-center space-y-2 relative group"
+                    >
+                      {/* Step Labels above line */}
+                      <div className="min-h-[32px] flex flex-col justify-end">
+                        <span className={`text-[11px] font-bold leading-tight ${
+                          isDone ? 'text-slate-800' : isCurrent ? 'text-blue-700 font-extrabold' : 'text-slate-400 font-normal'
+                        }`}>
+                          {step.stage}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          {step.date}
+                        </span>
+                      </div>
+
+                      {/* Line connector between nodes */}
+                      <div className="w-full flex items-center relative py-1">
+                        {idx > 0 && (
+                          <div
+                            className={`absolute left-0 right-1/2 h-0.5 ${
+                              isDone || isCurrent ? 'bg-blue-600' : 'bg-slate-200'
+                            }`}
+                          />
+                        )}
+                        {idx < timelineSteps.length - 1 && (
+                          <div
+                            className={`absolute left-1/2 right-0 h-0.5 ${
+                              isDone ? 'bg-blue-600' : 'bg-slate-200'
+                            }`}
+                          />
+                        )}
+
+                        {/* Node circle */}
+                        <div
+                          className={`relative z-10 w-4 h-4 rounded-full mx-auto border-2 flex items-center justify-center transition-all ${
+                            isDone
+                              ? 'bg-blue-600 border-blue-700 shadow-xs'
+                              : isCurrent
+                              ? 'bg-white border-blue-600 ring-4 ring-blue-100 scale-110'
+                              : 'bg-white border-slate-300'
+                          }`}
+                        />
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Why This Project Was Flagged */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
+            {/* Header with Rose Accent Bar */}
+            <div className="flex items-start gap-3 border-l-4 border-rose-500 pl-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Why This Project Was Flagged</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Key issues found by the AI engine.
+                </p>
+              </div>
+            </div>
+
+            {/* List of Simplified Key Issues */}
+            <div className="divide-y divide-slate-100">
+              {(project.anomalies && project.anomalies.length > 0
+                ? project.anomalies.slice(0, 4).map((anom, idx) => ({
+                    title: typeof anom === 'string' ? anom : anom.description || anom.title || 'Anomalous pattern detected',
+                    tag: idx < 2 ? 'CRITICAL' : 'REVIEW',
+                    pct: `${Math.max(55, Math.min(95, Math.round(riskScoreVal * (1 - idx * 0.08))))}%`,
+                    isCrit: idx < 2,
+                  }))
+                : [
+                    {
+                      title: project.delayDays ? `Timeline is ${project.delayDays} days behind schedule` : 'Timeline is 109 days behind schedule',
+                      tag: 'CRITICAL',
+                      pct: `${Math.round(riskScoreVal * 0.95)}%`,
+                      isCrit: true,
+                    },
+                    {
+                      title: 'Spending pattern looks unusual against progress',
+                      tag: 'CRITICAL',
+                      pct: `${Math.round(riskScoreVal * 0.88)}%`,
+                      isCrit: true,
+                    },
+                    {
+                      title: 'Stage-2 measurement & MB entry is pending',
+                      tag: 'REVIEW',
+                      pct: '64%',
+                      isCrit: false,
+                    },
+                    {
+                      title: 'Physical progress lower than benchmark for sector',
+                      tag: 'REVIEW',
+                      pct: '58%',
+                      isCrit: false,
+                    }
+                  ]
+              ).map((item, idx) => (
+                <div key={idx} className="py-3 flex items-center justify-between gap-4 text-xs">
+                  <span className="text-slate-800 font-medium">{item.title}</span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${
+                      item.isCrit
+                        ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                        : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    }`}>
+                      {item.tag}
+                    </span>
+                    <span className="font-mono text-slate-400 font-semibold text-[11px] w-8 text-right">
+                      {item.pct}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 5: Verified Records */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
+            {/* Header with Emerald Accent Bar */}
+            <div className="flex items-start gap-3 border-l-4 border-emerald-500 pl-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Verified Records</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Checks against official records and documents.
+                </p>
+              </div>
+            </div>
+
+            {/* Records List */}
+            <div className="divide-y divide-slate-100 text-xs">
+              <div className="py-2.5 flex items-center justify-between">
+                <span className="text-slate-700 font-medium">Work order & agreement</span>
+                <span className="text-emerald-600 font-bold">Verified</span>
+              </div>
+              <div className="py-2.5 flex items-center justify-between">
+                <span className="text-slate-700 font-medium">Payment records</span>
+                <span className="text-emerald-600 font-bold">Verified</span>
+              </div>
+              <div className="py-2.5 flex items-center justify-between">
+                <span className="text-slate-700 font-medium">Measurement book</span>
+                <span className="text-amber-600 font-bold">Pending</span>
+              </div>
+              <div className="py-2.5 flex items-center justify-between">
+                <span className="text-slate-700 font-medium">Inspection reports</span>
+                <span className="text-emerald-600 font-bold">Verified</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Footer System Disclaimer */}
+      <div className="text-[11px] text-slate-400 pt-2 font-mono">
+        Generated by MPLAD Sentinel AI risk engine
       </div>
 
       {/* Official Decision Action Modal */}
@@ -575,6 +700,7 @@ export const ProjectDetails = () => {
           </div>
         </div>
       </Modal>
-    </PageLayout>
+    </div>
   );
 };
+

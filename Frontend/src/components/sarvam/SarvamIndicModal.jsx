@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Volume2, VolumeX, Languages, Mic, Sparkles, X, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-export const SUPPORTED_LANGUAGES = [
+const SUPPORTED_LANGUAGES = [
   { code: 'hi-IN', name: 'Hindi', native: 'हिन्दी', flag: '🇮🇳' },
   { code: 'mr-IN', name: 'Marathi', native: 'मराठी', flag: '🇮🇳' },
   { code: 'ta-IN', name: 'Tamil', native: 'தமிழ்', flag: '🇮🇳' },

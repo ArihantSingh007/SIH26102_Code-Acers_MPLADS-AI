@@ -1,4 +1,4 @@
-﻿export const FALLBACK_PROJECTS = [
+export const FALLBACK_PROJECTS = [
   {
     id: "MPLAD-2026-00124",
     name: "Rural Road Construction & Paver Block Laying",
@@ -26,7 +26,7 @@
     slaDaysLeft: -109,
     slaUrgency: "CRITICAL",
     images: {
-      uploaded: "/evidence/MPLAD-2026-00124.svg"
+      uploaded: "/projects/ruralroad.jpg"
     },
     anomalies: [
       {
@@ -95,7 +95,7 @@
     slaDaysLeft: -152,
     slaUrgency: "CRITICAL",
     images: {
-      uploaded: "/evidence/MPLAD-2026-00231.svg"
+      uploaded: "/projects/communityhall.jpg"
     },
     anomalies: [
       {
@@ -155,7 +155,7 @@
     slaDaysLeft: -208,
     slaUrgency: "CRITICAL",
     images: {
-      uploaded: "/evidence/MPLAD-2026-00451.svg"
+      uploaded: "/projects/solarwater.jpg"
     },
     anomalies: [
       {
@@ -206,7 +206,7 @@
     slaDaysLeft: 60,
     slaUrgency: "SAFE",
     images: {
-      uploaded: "/evidence/MPLAD-2026-00089.svg"
+      uploaded: "/projects/smartclassroom.jpg"
     },
     anomalies: [],
     overrunProbability: 0.05,
@@ -247,7 +247,7 @@
     slaDaysLeft: -62,
     slaUrgency: "CRITICAL",
     images: {
-      uploaded: "/evidence/MPLAD-2026-00312.svg"
+      uploaded: "/projects/medicaloxygen.jpg"
     },
     anomalies: [
       {
@@ -298,7 +298,7 @@
     slaDaysLeft: -180,
     slaUrgency: "CRITICAL",
     images: {
-      uploaded: "/evidence/MPLAD-2026-00789.svg"
+      uploaded: "/projects/ledstreetlight.jpg"
     },
     anomalies: [
       {

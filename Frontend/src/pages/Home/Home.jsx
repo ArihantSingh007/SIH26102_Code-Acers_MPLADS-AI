@@ -147,7 +147,7 @@ const ScrollScalingHeading = ({ title = "About the MPLAD Scheme" }) => {
 };
 
 export const Home = () => {
-  const { user, isAuthenticated, logout, switchRole } = useAuth();
+  const { user, isAuthenticated, isAdmin, isDistrictOfficer, logout } = useAuth();
   const { currentLanguage, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
@@ -417,7 +417,7 @@ export const Home = () => {
                 to="/login"
                 className="px-3.5 py-1.5 bg-[#0B2545] hover:bg-[#081D37] text-white text-xs font-semibold rounded-lg shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer"
               >
-                <span>Officer Login</span>
+                <span>Login</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             )}
@@ -434,17 +434,6 @@ export const Home = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-blue-900/30 via-transparent to-transparent pointer-events-none" />
 
         <div className="max-w-5xl mx-auto text-center space-y-5 relative z-10">
-          {/* Reference pill tag */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-semibold backdrop-blur-sm shadow-inner"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-            <span>Next-Generation AI Forensic Vigilance for Scheme Guard</span>
-          </motion.div>
-
           {/* Reference headline */}
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
@@ -458,16 +447,6 @@ export const Home = () => {
             </span>
           </motion.h1>
 
-          {/* Reference subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xs sm:text-sm text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed"
-          >
-            Ensuring continuous algorithmic vigilance, transparent fund utilization, and high-assurance project verification across all 543 Lok Sabha Constituencies with OpenCV 64-bit dHash, NetworkX Cartel Analyzers, and Sarvam Indic Voice Intelligence.
-          </motion.p>
-
           {/* Call-to-action buttons with animated interactive icons */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -480,18 +459,20 @@ export const Home = () => {
               onClick={handleLaunchAdminDemo}
               className="group relative inline-flex items-center gap-2.5 px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-blue-500/30 transition-all duration-200 border border-blue-400/40 active:scale-95 cursor-pointer"
             >
-              <span>Launch MoSPI Central Command</span>
+              <span>{isDistrictOfficer ? 'Launch District Command' : 'Launch MoSPI Central Command'}</span>
               <AeroplaneArrow className="w-4 h-4 text-white" />
             </button>
 
-            <button
-              type="button"
-              onClick={handleLaunchCitizenPortal}
-              className="group relative inline-flex items-center gap-2.5 px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 text-slate-100 hover:text-white text-xs sm:text-sm font-semibold border border-slate-500/50 backdrop-blur-sm transition-all duration-200 active:scale-95 cursor-pointer"
-            >
-              <AnimatedEye className="w-4 h-4 text-cyan-300" />
-              <span>Explore Public Portal</span>
-            </button>
+            {!(isAdmin || isDistrictOfficer) && (
+              <button
+                type="button"
+                onClick={handleLaunchCitizenPortal}
+                className="group relative inline-flex items-center gap-2.5 px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 text-slate-100 hover:text-white text-xs sm:text-sm font-semibold border border-slate-500/50 backdrop-blur-sm transition-all duration-200 active:scale-95 cursor-pointer"
+              >
+                <AnimatedEye className="w-4 h-4 text-cyan-300" />
+                <span>Explore Public Portal</span>
+              </button>
+            )}
           </motion.div>
         </div>
 
@@ -614,9 +595,6 @@ export const Home = () => {
                 <h2 className="text-base sm:text-lg font-black text-[#0B2545]">
                   National Developmental Indicators & Fund Flow
                 </h2>
-                <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-blue-50 text-blue-800 rounded font-bold border border-blue-200">
-                  e-SAKSHI Official Metrics
-                </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 Live statistics of works recommended online by Hon'ble Members of Parliament under revised TSA fund procedure
@@ -634,7 +612,7 @@ export const Home = () => {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                🏛️ Statutory e-SAKSHI View
+                Statutory e-SAKSHI View
               </button>
               <button
                 type="button"
@@ -646,7 +624,7 @@ export const Home = () => {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                <span>⚡ AI Vigilance Layer</span>
+                <span>AI Vigilance Layer</span>
               </button>
             </div>
           </div>
@@ -777,37 +755,20 @@ export const Home = () => {
       </section>
 
       {/* 6. Methodology & Working Principle Section (Systemic Vulnerabilities + Algorithmic Vigilance) */}
-      <section id="methodology" className="w-full bg-[#F3F6F9] border-t border-b border-slate-300/80 py-16 mb-0 scroll-mt-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold font-mono shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              <span>Core Methodology & Working Principles</span>
-            </div>
+      <section id="methodology" className="w-full bg-[#F3F6F9] border-t border-b border-slate-300/80 py-12 mb-0 scroll-mt-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="text-center max-w-4xl mx-auto">
             <TypewriterHeading
               text="How It Works: Continuous Vigilance & Public Fund Safeguards"
-              className="text-2xl sm:text-4xl font-black text-[#0B2545] min-h-[44px]"
+              className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#0B2545] tracking-tight leading-tight"
             />
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Simple, automated checks that verify photo proof, block duplicate bills, and detect bidding rings—ensuring public development funds reach genuine local community projects.
-            </p>
           </div>
 
           {/* Part A: Systemic Vulnerabilities & Countermeasures Matrix */}
           <SystemicVulnerabilitiesFramework />
 
           {/* Part B: Three-Column Core Intelligence Engine */}
-          <div className="pt-8">
-            <div className="mb-6">
-              <h3 className="text-lg font-black text-[#0B2545] flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
-                <span>The Three Core Pillars of Vigilance</span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                How our automated checks, risk scoring models, and public transparency tools operate in real time.
-              </p>
-            </div>
-
+          <div className="pt-4">
             <ThreeColumnArchitecture
               onOpenSlideOver={() => handleOpenSlideOver({
                 id: 'MPLAD-2026-00124',

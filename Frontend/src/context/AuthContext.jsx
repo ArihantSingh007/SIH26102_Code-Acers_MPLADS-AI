@@ -30,28 +30,44 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   const login = async (email, password, selectedRole) => {
-    // Inferred role if not explicitly passed
-    let effectiveRole = selectedRole;
-    if (!effectiveRole) {
-      const em = (email || '').toLowerCase();
-      if (em.includes('admin') || em.includes('mospi')) {
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const cleanRole = (selectedRole || '').toLowerCase().trim();
+
+    // 1. Direct email lookup
+    let matchedUser = DEMO_USERS.find(
+      u => u.email.toLowerCase() === cleanEmail || (u.alternateEmail && u.alternateEmail.toLowerCase() === cleanEmail)
+    );
+
+    // 2. Role-based lookup
+    if (!matchedUser) {
+      let effectiveRole = cleanRole;
+      if (cleanRole.includes('admin') || cleanRole.includes('mospi') || cleanEmail.includes('admin') || cleanEmail.includes('mospi')) {
         effectiveRole = ROLES.MOSPI_ADMIN;
-      } else if (em.includes('district') || em.includes('collector') || em.includes('varanasi') || em.includes('dm')) {
+      } else if (cleanRole.includes('district') || cleanRole.includes('officer') || cleanEmail.includes('district') || cleanEmail.includes('collector') || cleanEmail.includes('varanasi') || cleanEmail.includes('dm')) {
         effectiveRole = ROLES.DISTRICT_OFFICER;
       } else {
         effectiveRole = ROLES.CITIZEN;
       }
+
+      matchedUser = DEMO_USERS.find(u => u.role === effectiveRole);
     }
 
-    const matchedUser = DEMO_USERS.find(u => u.role === effectiveRole) || {
-      id: `USR-${Date.now()}`,
-      email,
-      name: effectiveRole === ROLES.MOSPI_ADMIN ? 'Dr. Rajeshwar Sharma' : effectiveRole === ROLES.DISTRICT_OFFICER ? 'Priyanka Verma, IAS' : 'Amit Patel',
-      role: effectiveRole,
-      badge: effectiveRole === ROLES.MOSPI_ADMIN ? 'Central MoSPI Director' : effectiveRole === ROLES.DISTRICT_OFFICER ? 'District Magistrate' : 'Citizen Auditor',
-    };
+    // 3. Fallback deterministic generator
+    if (!matchedUser) {
+      const isAdm = cleanRole.includes('admin') || cleanRole.includes('mospi') || cleanEmail.includes('admin') || cleanEmail.includes('mospi');
+      const isDist = cleanRole.includes('district') || cleanRole.includes('officer') || cleanEmail.includes('district') || cleanEmail.includes('collector') || cleanEmail.includes('dm');
+      matchedUser = {
+        id: `USR-${Date.now()}`,
+        email: cleanEmail || (isAdm ? 'admin.mospi@gov.in' : isDist ? 'collector.varanasi@gov.in' : 'citizen.patel@gmail.com'),
+        name: isAdm ? 'Dr. Rajeshwar Sharma' : isDist ? 'Priyanka Verma, IAS' : 'Amit Patel',
+        role: isAdm ? ROLES.MOSPI_ADMIN : isDist ? ROLES.DISTRICT_OFFICER : ROLES.CITIZEN,
+        badge: isAdm ? 'Central MoSPI Admin' : isDist ? 'District Officer' : 'Citizen Explorer',
+      };
+    }
+
     setUser(matchedUser);
     setRole(matchedUser.role);
+    localStorage.setItem('mplads_auth_user', JSON.stringify(matchedUser));
     return { success: true, user: matchedUser };
   };
 

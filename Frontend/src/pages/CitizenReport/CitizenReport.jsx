@@ -69,19 +69,22 @@ export const CitizenReport = () => {
         issue_type: issueType,
         description,
         citizen_name: citizenName,
-        citizen_phone: citizenPhone,
+        location,
+        gps: gpsCoords,
+        evidenceImage: photoPreview || 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?w=600&auto=format&fit=crop&q=80'
       });
 
+      const repData = res?.data || {};
       setSubmittedReport({
-        ticketId: res.data?.ticketId || 'GRV-2026-8819',
-        status: 'DISPATCHED_TO_DISTRICT_COLLECTOR',
-        timestamp: new Date().toISOString(),
+        id: repData.id || res?.id || 'CIT-2026-8819',
+        status: repData.status || 'Under Verification',
+        submissionDate: repData.submissionDate || new Date().toISOString().split('T')[0],
       });
     } catch {
       setSubmittedReport({
-        ticketId: 'GRV-2026-8819',
-        status: 'DISPATCHED_TO_DISTRICT_COLLECTOR',
-        timestamp: new Date().toISOString(),
+        id: 'CIT-2026-8819',
+        status: 'Under Verification',
+        submissionDate: new Date().toISOString().split('T')[0],
       });
     } finally {
       setIsSubmitting(false);

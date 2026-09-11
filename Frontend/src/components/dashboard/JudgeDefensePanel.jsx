@@ -192,7 +192,7 @@ export const JudgeDefensePanel = () => {
               <div className="p-3 bg-white border border-emerald-100 rounded-lg space-y-1.5">
                 <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-[11px]">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                  <span>MPLAD Sentinel Algorithmic Solution</span>
+                  <span>Scheme Guard Algorithmic Solution</span>
                 </div>
                 <p className="text-slate-600 text-[11px] leading-relaxed">
                   {defenses[activeDef].solution}

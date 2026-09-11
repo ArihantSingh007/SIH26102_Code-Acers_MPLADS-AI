@@ -1,30 +1,49 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-// Eager load Home for instant first paint
+// Eager load core routes for instant navigation and zero dynamic import chunk failures
 import { Home } from '../pages/Home/Home';
+import Analytics from '../pages/Analytics/Analytics';
+import { EvidenceVerification } from '../pages/Evidence/EvidenceVerification';
+import { Dashboard } from '../pages/Dashboard/Dashboard';
+import { ProjectDetails } from '../pages/ProjectDetails/ProjectDetails';
+import { RiskMap } from '../pages/RiskMap/RiskMap';
+import { HighRiskQueue } from '../pages/HighRisk/HighRiskQueue';
+
+// Resilient lazy loader that retries dynamic chunk imports to prevent Vite dev-server HMR stale chunk failures
+const lazyWithRetry = (importFn) =>
+  lazy(async () => {
+    try {
+      const module = await importFn();
+      return { default: module.default || module[Object.keys(module)[0]] };
+    } catch (error) {
+      console.warn('Initial chunk import failed, attempting fallback retry...', error);
+      try {
+        const module = await importFn();
+        return { default: module.default || module[Object.keys(module)[0]] };
+      } catch (retryError) {
+        console.error('Dynamic module import failed after retry:', retryError);
+        throw retryError;
+      }
+    }
+  });
 
 // Lazy load secondary routes for resilience and fast page load
-const Login = lazy(() => import('../pages/Login/Login').then(m => ({ default: m.Login })));
-const Register = lazy(() => import('../pages/Register/Register').then(m => ({ default: m.Register })));
-const Dashboard = lazy(() => import('../pages/Dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
-const DistrictDashboard = lazy(() => import('../pages/Dashboard/DistrictDashboard').then(m => ({ default: m.DistrictDashboard })));
-const Analytics = lazy(() => import('../pages/Analytics/Analytics').then(m => ({ default: m.Analytics || m.default })));
-const RiskMap = lazy(() => import('../pages/RiskMap/RiskMap').then(m => ({ default: m.RiskMap })));
-const HighRiskQueue = lazy(() => import('../pages/HighRisk/HighRiskQueue').then(m => ({ default: m.HighRiskQueue })));
-const ProjectDetails = lazy(() => import('../pages/ProjectDetails/ProjectDetails').then(m => ({ default: m.ProjectDetails })));
-const EvidenceVerification = lazy(() => import('../pages/Evidence/EvidenceVerification').then(m => ({ default: m.EvidenceVerification })));
-const CartelMatrix = lazy(() => import('../pages/CartelMatrix/CartelMatrix').then(m => ({ default: m.CartelMatrix })));
-const SLAMonitoring = lazy(() => import('../pages/SLA/SLAMonitoring').then(m => ({ default: m.SLAMonitoring })));
-const AIPreScreening = lazy(() => import('../pages/PreScreening/AIPreScreening').then(m => ({ default: m.AIPreScreening })));
-const PhotoValidation = lazy(() => import('../pages/PhotoValidation/PhotoValidation').then(m => ({ default: m.PhotoValidation })));
-const Profile = lazy(() => import('../pages/Profile/Profile').then(m => ({ default: m.Profile })));
-const NotFound = lazy(() => import('../pages/NotFound/NotFound').then(m => ({ default: m.NotFound })));
+const Login = lazyWithRetry(() => import('../pages/Login/Login'));
+const Register = lazyWithRetry(() => import('../pages/Register/Register'));
+const DistrictDashboard = lazyWithRetry(() => import('../pages/Dashboard/DistrictDashboard'));
+const CartelMatrix = lazyWithRetry(() => import('../pages/CartelMatrix/CartelMatrix'));
+const SLAMonitoring = lazyWithRetry(() => import('../pages/SLA/SLAMonitoring'));
+const AIPreScreening = lazyWithRetry(() => import('../pages/PreScreening/AIPreScreening'));
+const PhotoValidation = lazyWithRetry(() => import('../pages/PhotoValidation/PhotoValidation'));
+const Profile = lazyWithRetry(() => import('../pages/Profile/Profile'));
+const NotFound = lazyWithRetry(() => import('../pages/NotFound/NotFound'));
 
-const PublicHome = lazy(() => import('../pages/PublicPortal/PublicHome').then(m => ({ default: m.PublicHome })));
-const PublicMap = lazy(() => import('../pages/PublicPortal/PublicMap').then(m => ({ default: m.PublicMap })));
-const PublicSearch = lazy(() => import('../pages/PublicPortal/PublicSearch').then(m => ({ default: m.PublicSearch })));
-const CitizenReport = lazy(() => import('../pages/CitizenReport/CitizenReport').then(m => ({ default: m.CitizenReport })));
+const PublicHome = lazyWithRetry(() => import('../pages/PublicPortal/PublicHome'));
+const PublicMap = lazyWithRetry(() => import('../pages/PublicPortal/PublicMap'));
+const PublicSearch = lazyWithRetry(() => import('../pages/PublicPortal/PublicSearch'));
+const CitizenReport = lazyWithRetry(() => import('../pages/CitizenReport/CitizenReport'));
+const AdminCitizenReports = lazyWithRetry(() => import('../pages/Admin/AdminCitizenReports'));
 
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -67,6 +86,7 @@ export const AppRoutes = () => {
           <Route path="/evidence" element={<EvidenceVerification />} />
           <Route path="/cartel-matrix" element={<CartelMatrix />} />
           <Route path="/sla" element={<SLAMonitoring />} />
+          <Route path="/admin/grievances" element={<AdminCitizenReports />} />
           <Route path="/profile" element={<Profile />} />
 
           {/* District Officer Specific Routes */}
